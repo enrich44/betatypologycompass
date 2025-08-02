@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typology Compass Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2e7d32;
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .option {
+            text-align: center;
+            width: 18%;
+        }
+        .option label {
+            display: block;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px 0;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            display: none;
+            margin-top: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #compass {
+             width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            position: relative;
+            background-image: url('https://i.imgur.com/AqxpiUe.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        #point {
+            width: 16px;
+            height: 16px;
+            background-color: #ff3366;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 10;
+        }
+        .coordinates {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .description {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+        }
+        @media (max-width: 500px) {
+            #compass {
+                width: 300px;
+                height: 300px;
+            }
+            .options {
+                flex-wrap: wrap;
+            }
+            .option {
+                width: 48%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Typology Compass Test</h1>
+    <p>Answer the following questions to see where you fall on the typology compass.</p>
+    
+    <div id="questions">
+        <!-- Questions will be inserted here by JavaScript -->
+    </div>
+    
+    <button id="submit">Submit Answers</button>
+    
+    <div id="results">
+        <h2>Your Typology Compass Results</h2>
+        <div id="compass">
+            <div id="point"></div>
+        </div>
+        <div class="coordinates">
+            Your position: <span id="position-text">(0, 0)</span>
+        </div>
+        <div class="description" id="result-description">
+            <!-- Description will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // All questions with their axis and scoring
+        const questions = [
+            // Science (negative) vs Pseudoscience (positive) questions
+            { text: "I trust my gut more than empirical data", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Astrology or personality types like MBTI often reveal hidden truths", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Typology is irrelevant and has no practical use", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "I feel more connected to ancient wisdom than modern science", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Typology can be used in solving mental problems", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "I use typology to assume people personality and core essence", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "I dont care what experts say, typology is scientific", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "People that are evil and i dont like have specific placements", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "It is rude to type someone in enneagram, as you are assuming someones 'trauma'", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Empirical psychology is too shallow to explain people the way typology can", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "If I can predict someone's behavior through typology, it proves it works", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Typology is mostly self-projection, not science", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "I base my typing on energy, not behavior", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Typology should be used when attacking someone personally", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "If i we're a judge i would use someone's typology system to judge them", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "I date,or make friends based on their placements", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "If a theory can't be tested or falsified, it isn't scientific", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Extraordinary claims require extraordinary evidence", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Typology is only for fun", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "People that take typology in serious are losers", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Typology lacks standardized definitions, making it unreliable as science", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "If it helps people, that makes it valid.", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Only BIG 5 is a valid scientific system", axis: "science", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "I wish everyone knew typology so we could type eachother", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Judging people based on their typology makes sense", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "I feel disgusted by some people placements", axis: "science", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            
+            // Dogmatic (positive) vs Pragmatic (negative) questions
+            { text: "Contradictions do not exist", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Typology has clear correlations that need to be respected", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "I am ok with the old school contradictions and correlations", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "When someone's typology contradicts i feel like i need to point it out", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Being too rigid in beliefs can lead to failure", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "SCS has no contradictions", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Enneagram has no contradictions", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "PY has no contradictions", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "I only follow Naranjo's school with no exception", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Adapting beliefs to real-life evidence is a mark of maturity", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "There are fixed laws to how the world and people work", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "It makes me mad when someone's typology contradicts", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Most of typology is open to interpretation", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "If someone is LSI in Socionics they must be a ISTP in MBTI", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "16 personalities is overhated", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "MBTI is overhated and its cool", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "I dont like it when people type my favourite characters differently", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "If i typed a character,its hard to change my opinion on its type", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "I'd rather be effective than ideologically consistent", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "If someone types themselves differently than I do, one of us must be wrong", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "Systems like MBTI and Enneagram have true forms that shouldn't be mixed", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "People who don't know the theory deeply shouldn't argue types", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] },
+            { text: "The value of a system is in how well it helps, not in how rigidly it's followed", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Interpretation is part of the typology process, not a flaw in it", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Even 'incorrect' typings can be insightful in some context", axis: "dogmatic", direction: -1, weights: [2, 1, 0, -1, -2] },
+            { text: "Only certified experts should be allowed to type people professionally", axis: "dogmatic", direction: 1, weights: [-2, -1, 0, 1, 2] }
+        ];
+
+        // Initialize the questions
+        document.addEventListener('DOMContentLoaded', function() {
+            const questionsContainer = document.getElementById('questions');
+            
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <p>${index + 1}. ${question.text}</p>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q${index}-1" name="q${index}" value="1" required>
+                            <label for="q${index}-1">Strongly<br>Disagree</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}-2" name="q${index}" value="2">
+                            <label for="q${index}-2">Disagree</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}-3" name="q${index}" value="3">
+                            <label for="q${index}-3">Neutral</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}-4" name="q${index}" value="4">
+                            <label for="q${index}-4">Agree</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}-5" name="q${index}" value="5">
+                            <label for="q${index}-5">Strongly<br>Agree</label>
+                        </div>
+                    </div>
+                `;
+                questionsContainer.appendChild(questionDiv);
+            });
+            
+            // Handle form submission
+            document.getElementById('submit').addEventListener('click', calculateResults);
+        });
+
+        function calculateResults() {
+            // Check if all questions are answered
+            const unanswered = document.querySelectorAll('div.question:not(:has(input:checked))');
+            if (unanswered.length > 0) {
+                alert(`Please answer all questions. You have ${unanswered.length} unanswered questions.`);
+                unanswered[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                unanswered[0].style.backgroundColor = '#fff3f3';
+                setTimeout(() => {
+                    unanswered[0].style.backgroundColor = 'white';
+                }, 2000);
+                return;
+            }
+
+            let scienceScore = 0;
+            let dogmaticScore = 0;
+            let scienceCount = 0;
+            let dogmaticCount = 0;
+            
+            questions.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selectedOption) {
+                    const value = parseInt(selectedOption.value);
+                    const weight = question.weights[value - 1];
+                    
+                    if (question.axis === "science") {
+                        scienceScore += weight;
+                        scienceCount++;
+                    } else {
+                        dogmaticScore += weight;
+                        dogmaticCount++;
+                    }
+                }
+            });
+            
+            // Calculate average scores (-100 to 100 range)
+            const scienceAverage = (scienceCount > 0) ? (scienceScore / scienceCount) * 20 : 0;
+            const dogmaticAverage = (dogmaticCount > 0) ? (dogmaticScore / dogmaticCount) * 20 : 0;
+            
+            // Display results
+            showResults(scienceAverage, dogmaticAverage);
+        }
+
+        function showResults(science, dogmatic) {
+            // Normalize to compass coordinates (0-400px)
+            const compassWidth = 400;
+            const compassHeight = 400;
+            
+            // Convert scores to pixels (0-400 range)
+            // Science: -100 (left) to 100 (right)
+            // Dogmatic: -100 (bottom) to 100 (top)
+            const xPos = ((science + 100) / 200) * compassWidth;
+            const yPos = compassHeight - ((dogmatic + 100) / 200) * compassHeight;
+            
+            // Move the point with animation
+            const point = document.getElementById('point');
+            point.style.left = `${xPos}px`;
+            point.style.top = `${yPos}px`;
+            
+            // Update position text
+            document.getElementById('position-text').textContent = 
+                `Science-Pseudoscience: ${science.toFixed(1)}, Dogmatic-Pragmatic: ${dogmatic.toFixed(1)}`;
+            
+            // Generate description
+            let description = "";
+            
+            // Science-Pseudoscience axis
+            if (science < -60) {
+                description += "You have a <strong>strongly scientific</strong> approach to typology. ";
+            } else if (science < -20) {
+                description += "You lean toward a <strong>scientific</strong> approach to typology. ";
+            } else if (science < 20) {
+                description += "You're <strong>neutral</strong> on the science-pseudoscience spectrum. ";
+            } else if (science < 60) {
+                description += "You lean toward a <strong>pseudoscientific</strong> approach to typology. ";
+            } else {
+                description += "You have a <strong>strongly pseudoscientific</strong> approach to typology. ";
+            }
+            
+            // Dogmatic-Pragmatic axis
+            if (dogmatic < -60) {
+                description += "You're <strong>highly pragmatic</strong> in your approach to typology. ";
+            } else if (dogmatic < -20) {
+                description += "You lean toward a <strong>pragmatic</strong> approach to typology. ";
+            } else if (dogmatic < 20) {
+                description += "You're <strong>neutral</strong> on the dogmatic-pragmatic spectrum. ";
+            } else if (dogmatic < 60) {
+                description += "You lean toward a <strong>dogmatic</strong> approach to typology. ";
+            } else {
+                description += "You're <strong>highly dogmatic</strong> in your approach to typology. ";
+            }
+            
+            // Combined analysis
+            if (science < -30 && dogmatic > 30) {
+                description += "<br><br>Your combination suggests you value empirical evidence but maintain rigid interpretations of typology systems.";
+            } else if (science > 30 && dogmatic > 30) {
+                description += "<br><br>Your combination suggests strong belief in typology systems with strict adherence to their principles.";
+            } else if (science > 30 && dogmatic < -30) {
+                description += "<br><br>Your combination suggests you enjoy typology systems but approach them flexibly and adaptively.";
+            } else if (science < -30 && dogmatic < -30) {
+                description += "<br><br>Your combination suggests skepticism of typology systems but openness to their practical applications.";
+            }
+            
+            document.getElementById('result-description').innerHTML = description;
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
